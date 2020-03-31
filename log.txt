@@ -1,9 +1,3 @@
-# TNO
-A terminal based notes application
-
-## help
-
-```
 usage: tno.py [-h] [-s] [-r READ] [-n NEW] [-d DELETE] [-e EDIT]
 
 A terminal based notes app
@@ -16,5 +10,3 @@ optional arguments:
   -d DELETE, --delete DELETE
                         Delete note
   -e EDIT, --edit EDIT  Opens note in your default text editor
-
-```  
