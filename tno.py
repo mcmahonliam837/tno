@@ -7,10 +7,10 @@ import os
 import editor
 import json
 import subprocess
+import pathlib
 
-noteDB = './tno_db.json'
-noteDir = 'notes/'
-
+noteDB = str(pathlib.Path(__file__).parent.absolute()) + '/tno_db.json'
+noteDir = str(pathlib.Path(__file__).parent.absolute()) + '/notes/'
 
 def loadDB():
     global noteDB
@@ -57,14 +57,31 @@ def newNote(name, tags=[]):
     db = loadDB()
     db[name] = { 'tags': tags }
     updateDB(db)
+    if '/' in name:
+        p = noteDir
+        for n in name.split('/')[0:-1]:
+            p += n + '/'
+        if not os.path.isdir(p):
+            os.makedirs(p)
+
     editor.edit(filePathFromName(name))
 
 
 def deleteNote(name):
+    global noteDir
     try:
         os.remove(filePathFromName(name))
-    except(Exception):
-        pass
+        if '/' in name:
+            dirs = name.split('/')[0:-1]
+            for i in reversed(range(len(dirs))):
+                d = noteDir
+                for j in range(i+1):
+                    d += dirs[j] + '/'
+                if not os.listdir(d):
+                    os.rmdir(d)
+
+    except(FileNotFoundError):
+        print('File not found')
     db = loadDB()
     if name in db:
         del db[name]
@@ -76,7 +93,7 @@ def editNote(name):
 
 
 def validateNoteName(name):
-    return not re.search('^([a-z,_,.])+$', name) is None
+    return not re.search('^([a-z0-9_./])+$', name) is None
 
 
 def parseArgs():
