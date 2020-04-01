@@ -75,17 +75,17 @@ def validateNoteName(name):
 
 def parseArgs():
     parser = argparse.ArgumentParser(description='A terminal based notes app')
-    parser.add_argument('-s', '--show', required=False, action='store_true', help='Lists all notes')
-    parser.add_argument('-r', '--read', required=False, help='Gets a note by name')
-    parser.add_argument('-n', '--new', required=False, help='Creates new note')
-    parser.add_argument('-d', '--delete', required=False, help='Delete note')
-    parser.add_argument('-e', '--edit', required=False, help='Opens note in your default text editor')
-    return parser.parse_args()
+    g = parser.add_argument_group('CRUD')
+    g.add_argument('-s', '--show', required=False, action='store_true', help='Lists all notes')
+    g.add_argument('-r', '--read', required=False, help='Gets a note by name')
+    g.add_argument('-n', '--new', required=False, help='Creates new note')
+    g.add_argument('-d', '--delete', required=False, help='Delete note')
+    g.add_argument('-e', '--edit', required=False, help='Opens note in your default text editor')
+    return (parser, parser.parse_args())
 
 
 def main():
-    args = parseArgs()
-
+    parser, args = parseArgs()
     if args.show:
         listNotes()
     elif args.read != None:
@@ -112,7 +112,8 @@ def main():
             editNote(name)
         else:
             print('Note names must only contain charactors a-z _ .')
-
+    else:
+        parser.print_help()
 
 
 
