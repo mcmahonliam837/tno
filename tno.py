@@ -6,6 +6,7 @@ import sys
 import os
 import editor
 import json
+import subprocess
 
 noteDB = './tno_db.json'
 noteDir = 'notes/'
@@ -29,13 +30,17 @@ def filePathFromName(name):
     return noteDir + name + '.txt'
 
 
-def searchNotes(name=None, tags=None):
+def searchNotes(name=None, tags=None, less=True):
     db = loadDB()
     try:
         for o in db:
             if o['name'] == name:
-                with open(filePathFromName(name), 'r') as f:
-                    print(f.read())
+                if less:
+                    p = subprocess.Popen(["/usr/bin/less", filePathFromName(name)])
+                    p.wait()
+                else:
+                    with open(filePathFromName(name), 'r') as f:
+                        print(f.read())
     except(Exception):
         print('Note \"{0}\" not found'.format(name))
 
@@ -81,6 +86,7 @@ def parseArgs():
     g.add_argument('-n', '--new', required=False, help='Creates new note')
     g.add_argument('-d', '--delete', required=False, help='Delete note')
     g.add_argument('-e', '--edit', required=False, help='Opens note in your default text editor')
+    parser.add_argument('--noless', action='store_true', default=False, help='All output goes to stdout, not less')
     return (parser, parser.parse_args())
 
 
@@ -91,7 +97,7 @@ def main():
     elif args.read != None:
         name = args.read.strip()
         if validateNoteName(name):
-            searchNotes(name=name)
+            searchNotes(name=name, less=not args.noless)
         else:
             print('Note names must only contain charactors a-z _ .')
     elif args.new != None:
