@@ -32,23 +32,21 @@ def filePathFromName(name):
 
 def searchNotes(name=None, tags=None, less=True):
     db = loadDB()
-    try:
-        for o in db:
-            if o['name'] == name:
-                if less:
-                    p = subprocess.Popen(["/usr/bin/less", filePathFromName(name)])
-                    p.wait()
-                else:
-                    with open(filePathFromName(name), 'r') as f:
-                        print(f.read())
-    except(Exception):
+    if name in db :
+        if less:
+            p = subprocess.Popen(["/usr/bin/less", filePathFromName(name)])
+            p.wait()
+        else:
+            with open(filePathFromName(name), 'r') as f:
+                print(f.read())
+    else:
         print('Note \"{0}\" not found'.format(name))
 
 
 def listNotes():
     db = loadDB()
-    for n in db:
-        print(n['name'])
+    for n in db.keys():
+        print(n)
 
 
 def newNote(name, tags=[]):
@@ -57,7 +55,7 @@ def newNote(name, tags=[]):
         print('Invalid name')
         exit(-1)
     db = loadDB()
-    db.append({ 'name': name, 'tags': tags })
+    db[name] = { 'tags': tags }
     updateDB(db)
     editor.edit(filePathFromName(name))
 
@@ -67,7 +65,10 @@ def deleteNote(name):
         os.remove(filePathFromName(name))
     except(Exception):
         pass
-    updateDB( list( filter( lambda x: x['name'] != name, loadDB() ) ) )
+    db = loadDB()
+    if name in db:
+        del db[name]
+        updateDB(db)
 
 
 def editNote(name):
