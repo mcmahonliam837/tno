@@ -93,6 +93,7 @@ def deleteNote(name):
 
     except(FileNotFoundError):
         print('File not found')
+
     db = loadDB()
     if name in db:
         del db[name]
@@ -129,8 +130,7 @@ def main():
         lt = time.localtime()
         name = t.strftime("%Y-%m-%d-")
         name += '%s-%s-%s' % (lt.tm_hour, lt.tm_min, lt.tm_sec)
-        print(name)
-        os.system('tar -zcvf ./backup-%s.tar.gz %s' % (name, noteDir))
+        os.system('tar -zcf ./backup-%s.tar.gz %s' % (name, noteDir))
         return
 
     if not os.path.isdir(tnoDir):
