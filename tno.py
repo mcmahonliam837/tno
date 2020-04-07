@@ -131,7 +131,7 @@ def main():
         name += '%s-%s-%s' % (lt.tm_hour, lt.tm_min, lt.tm_sec)
         print(name)
         os.system('tar -zcvf ./backup-%s.tar.gz %s' % (name, noteDir))
-        exit()
+        return
 
     if not os.path.isdir(tnoDir):
         os.mkdir(tnoDir)
