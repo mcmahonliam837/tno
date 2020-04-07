@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
-
+#!/home/hymx/fun/tno/venv/bin/python3
+from datetime import date
+import time
 import re
 import argparse
 import sys
@@ -8,9 +9,12 @@ import editor
 import json
 import subprocess
 import pathlib
+homeDir = os.path.expanduser("~")
+tnoDir = '%s/Documents/tno' % (homeDir)
 
-noteDB = str(pathlib.Path(__file__).parent.absolute()) + '/tno_db.json'
-noteDir = str(pathlib.Path(__file__).parent.absolute()) + '/notes/'
+noteDir = '%s/notes/' % (tnoDir)
+noteDB = '%s/tno_db.json' % (tnoDir)
+
 
 def loadDB():
     global noteDB
@@ -54,9 +58,9 @@ def newNote(name, tags=[]):
     if len(name) < 1:
         print('Invalid name')
         exit(-1)
+
     db = loadDB()
-    db[name] = { 'tags': tags }
-    updateDB(db)
+
     if '/' in name:
         p = noteDir
         for n in name.split('/')[0:-1]:
@@ -64,8 +68,15 @@ def newNote(name, tags=[]):
         if not os.path.isdir(p):
             os.makedirs(p)
 
-    editor.edit(filePathFromName(name))
+    try:
+        editor.edit(filePathFromName(name))
 
+        os.path.isfile(filePathFromName(name))
+    except:
+        return
+
+    db[name] = { 'tags': tags }
+    updateDB(db)
 
 def deleteNote(name):
     global noteDir
@@ -99,17 +110,40 @@ def validateNoteName(name):
 def parseArgs():
     parser = argparse.ArgumentParser(description='A terminal based notes app')
     g = parser.add_argument_group('CRUD')
-    g.add_argument('-s', '--show', required=False, action='store_true', help='Lists all notes')
-    g.add_argument('-r', '--read', required=False, help='Gets a note by name')
-    g.add_argument('-n', '--new', required=False, help='Creates new note')
-    g.add_argument('-d', '--delete', required=False, help='Delete note')
-    g.add_argument('-e', '--edit', required=False, help='Opens note in your default text editor')
+    g.add_argument('-s', '--show', action='store_true', help='Lists all notes')
+    g.add_argument('-r', '--read', help='Gets a note by name')
+    g.add_argument('-n', '--new', help='Creates new note')
+    g.add_argument('-d', '--delete', help='Delete note')
+    g.add_argument('-e', '--edit', help='Opens note in your default text editor')
+    g.add_argument('-b', '--backup', action='store_true', help='Opens note in your default text editor')
     parser.add_argument('--noless', action='store_true', default=False, help='All output goes to stdout, not less')
     return (parser, parser.parse_args())
 
 
 def main():
+    global noteDir
     parser, args = parseArgs()
+
+    if args.backup:
+        t = date.today()
+        lt = time.localtime()
+        name = t.strftime("%Y-%m-%d-")
+        name += '%s-%s-%s' % (lt.tm_hour, lt.tm_min, lt.tm_sec)
+        print(name)
+        os.system('tar -zcvf ./backup-%s.tar.gz %s' % (name, noteDir))
+        exit()
+
+    if not os.path.isdir(tnoDir):
+        os.mkdir(tnoDir)
+
+    if not os.path.isfile(noteDB):
+        with open(noteDB, 'w') as f:
+            f.write('{}')
+
+    if not os.path.isdir(noteDir):
+        os.mkdir(noteDir)
+
+
     if args.show:
         listNotes()
     elif args.read != None:
